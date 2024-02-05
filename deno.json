@@ -4,6 +4,7 @@
   
     "imports": {
       "macromaniajsx/jsx-dev-runtime": "../macromania/main.ts",
+      "macromaniajsx/jsx-runtime": "../macromania/main.ts",
     },
   
     "compilerOptions": {

@@ -10,15 +10,33 @@ import {
 
 import { Context, Expression, styleFile } from "../macromania/main.ts";
 
+export interface ChmodProps {
+  /**
+   * path to the file
+   */
+  path: string | URL;
+  mode: number;
+}
+
 /**
  * Changes the permission of a specific file/directory of
  * specified path. Ignores the process's umask.
  *
  * See https://deno.land/api@v1.40.3?unstable=true&s=Deno.chmodSync
+ *
+ * @param path - The path to the file.
+ * @param mode - The mode is a sequence of 3 octal numbers. The first/left-most number specifies the permissions for the owner. The second number specifies the permissions for the group. The last/right-most number specifies the permissions for others. For example, with a mode of 0o764, the owner (7) can read/write/execute, the group (6) can read/write and everyone else (4) can read only.
+ *
  * @returns The empty string.
  */
 export function Chmod(
-  { path, mode }: { path: string | URL; mode: number },
+  {
+    path,
+    mode,
+  }: {
+    path: string | URL;
+    mode: number;
+  },
 ): Expression {
   return (
     <impure
@@ -29,7 +47,7 @@ export function Chmod(
           ctx.error(
             `Failed to chmod file ${
               styleFile(path.toString())
-            } to the permissions 0o${mode.toString(8)}.`,
+            } to the permissions 0o${mode.toString(8)}F.`,
           );
           ctx.error(err);
           ctx.halt();
