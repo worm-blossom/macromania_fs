@@ -13,14 +13,6 @@ import {
   expressions,
 } from "./deps.ts";
 
-export interface ChmodProps {
-  /**
-   * path to the file
-   */
-  path: string | URL;
-  mode: number;
-}
-
 /**
  * Changes the permission of a specific file/directory of
  * specified path. Ignores the process's umask.
