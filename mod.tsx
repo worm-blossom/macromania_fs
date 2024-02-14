@@ -1,12 +1,12 @@
 import {
   Context,
   CopyOptions,
-  copySync,
-  emptyDirSync,
-  ensureDirSync,
-  ensureFileSync,
-  ensureLinkSync,
-  ensureSymlinkSync,
+  copy,
+  emptyDir,
+  ensureDir,
+  ensureFile,
+  ensureLink,
+  ensureSymlink,
   Expression,
   Expressions,
   styleFile,
@@ -25,7 +25,7 @@ export interface ChmodProps {
  * Changes the permission of a specific file/directory of
  * specified path. Ignores the process's umask.
  *
- * See https://deno.land/api@v1.40.3?unstable=true&s=Deno.chmodSync
+ * See https://deno.land/api@v1.40.3?unstable=true&s=Deno.chmod
  *
  * @param path - The path to the file.
  * @param mode - The mode is a sequence of 3 octal numbers. The first/left-most number specifies the permissions for the owner. The second number specifies the permissions for the group. The last/right-most number specifies the permissions for others. For example, with a mode of 0o764, the owner (7) can read/write/execute, the group (6) can read/write and everyone else (4) can read only.
@@ -43,9 +43,9 @@ export function Chmod(
 ): Expression {
   return (
     <impure
-      fun={(ctx: Context) => {
+      fun={async (ctx: Context) => {
         try {
-          Deno.chmodSync(path, mode);
+          await await Deno.chmod(path, mode);
         } catch (err) {
           ctx.error(
             `Failed to chmod file ${
@@ -64,7 +64,7 @@ export function Chmod(
 /**
  * Changes the owner of a regular file or directory.
  *
- * https://deno.land/api@v1.40.3?unstable=true&s=Deno.chownSync
+ * https://deno.land/api@v1.40.3?unstable=true&s=Deno.chown
  * @returns The empty string.
  */
 export function Chown(
@@ -72,9 +72,9 @@ export function Chown(
 ): Expression {
   return (
     <impure
-      fun={(ctx: Context) => {
+      fun={async (ctx: Context) => {
         try {
-          Deno.chownSync(path, uid ?? null, gid ?? null);
+          await Deno.chown(path, uid ?? null, gid ?? null);
         } catch (err) {
           ctx.error(
             `Failed to chown file ${styleFile(path.toString())}`,
@@ -99,7 +99,7 @@ export function Chown(
  * specified path, by default creating a new file if needed, else overwriting.
  * Fails if target path is a directory or is unwritable.
  *
- * See https://deno.land/api@v1.40.3?unstable=true&s=Deno.copyFileSync
+ * See https://deno.land/api@v1.40.3?unstable=true&s=Deno.copyFile
  * @returns The empty string.
  */
 export function CopyFile(
@@ -107,9 +107,9 @@ export function CopyFile(
 ): Expression {
   return (
     <impure
-      fun={(ctx: Context) => {
+      fun={ async (ctx: Context) => {
         try {
-          Deno.copyFileSync(from, to);
+          await Deno.copyFile(from, to);
         } catch (err) {
           ctx.error(
             `Failed to copy file from ${styleFile(from.toString())} to ${
@@ -128,7 +128,7 @@ export function CopyFile(
 /**
  * Creates `newpath` as a hard link to `oldpath`.
  *
- * See https://deno.land/api@v1.40.3?unstable=true&s=Deno.linkSync
+ * See https://deno.land/api@v1.40.3?unstable=true&s=Deno.link
  * @returns The empty string.
  */
 export function Link(
@@ -136,9 +136,9 @@ export function Link(
 ): Expression {
   return (
     <impure
-      fun={(ctx: Context) => {
+      fun={ async (ctx: Context) => {
         try {
-          Deno.linkSync(oldpath, newpath);
+          await Deno.link(oldpath, newpath);
         } catch (err) {
           ctx.error(
             `Failed to create ${
@@ -163,7 +163,7 @@ export function Link(
  * It is the caller's responsibility to remove the directory when no longer
  * needed.
  *
- * See https://deno.land/api@v1.40.3?unstable=true&s=Deno.makeTempDirSync
+ * See https://deno.land/api@v1.40.3?unstable=true&s=Deno.makeTempDir
  * @returns The full path to the newly created directory.
  */
 export function MakeTempDir(
@@ -171,9 +171,9 @@ export function MakeTempDir(
 ): Expression {
   return (
     <impure
-      fun={(ctx: Context) => {
+      fun={ async (ctx: Context) => {
         try {
-          return Deno.makeTempDirSync(options);
+          return await Deno.makeTempDir(options);
         } catch (err) {
           ctx.error(`Failed to create temporary directory.`);
           if (options) {
@@ -196,7 +196,7 @@ export function MakeTempDir(
  *
  * It is the caller's responsibility to remove the file when no longer needed.
  *
- * See https://deno.land/api@v1.40.3?unstable=true&s=Deno.makeTempFileSync
+ * See https://deno.land/api@v1.40.3?unstable=true&s=Deno.makeTempFile
  * @returns The full path to the newly created file.
  */
 export function MakeTempFile(
@@ -204,9 +204,9 @@ export function MakeTempFile(
 ): Expression {
   return (
     <impure
-      fun={(ctx: Context) => {
+      fun={ async (ctx: Context) => {
         try {
-          return Deno.makeTempFileSync(options);
+          return await Deno.makeTempFile(options);
         } catch (err) {
           ctx.error(`Failed to create temporary file.`);
           if (options) {
@@ -223,7 +223,7 @@ export function MakeTempFile(
 /**
  * Creates a new directory with the specified path.
  *
- * See https://deno.land/api@v1.40.3?unstable=true&s=Deno.mkdirSync
+ * See https://deno.land/api@v1.40.3?unstable=true&s=Deno.mkdir
  * @returns The empty string.
  */
 export function Mkdir(
@@ -231,9 +231,9 @@ export function Mkdir(
 ): Expression {
   return (
     <impure
-      fun={(ctx: Context) => {
+      fun={ async (ctx: Context) => {
         try {
-          Deno.mkdirSync(path, options);
+          await Deno.mkdir(path, options);
         } catch (err) {
           ctx.error(`Failed to create directory ${path.toString()}`);
           if (options) {
@@ -251,7 +251,7 @@ export function Mkdir(
 /**
  * Returns the full path destination of the named symbolic link.
  *
- * https://deno.land/api@v1.40.3?unstable=true&s=Deno.readLinkSync
+ * https://deno.land/api@v1.40.3?unstable=true&s=Deno.readLink
  * @returns The full path destination of the named symbolic link.
  */
 export function ReadLink(
@@ -259,9 +259,9 @@ export function ReadLink(
 ): Expression {
   return (
     <impure
-      fun={(ctx: Context) => {
+      fun={ async (ctx: Context) => {
         try {
-          return Deno.readLinkSync(path);
+          return await Deno.readLink(path);
         } catch (err) {
           ctx.error(`Failed to read link ${path.toString()}`);
           ctx.error(err);
@@ -276,7 +276,7 @@ export function ReadLink(
  * Reads and returns the entire contents of a file as an UTF-8 decoded string.
  * Reading a directory throws an error.
  *
- * https://deno.land/api@v1.40.3?unstable=true&s=Deno.readTextFileSync
+ * https://deno.land/api@v1.40.3?unstable=true&s=Deno.readTextFile
  * @returns The file contents.
  */
 export function ReadTextFile(
@@ -284,9 +284,9 @@ export function ReadTextFile(
 ): Expression {
   return (
     <impure
-      fun={(ctx: Context) => {
+      fun={ async (ctx: Context) => {
         try {
-          return Deno.readTextFileSync(path);
+          return await Deno.readTextFile(path);
         } catch (err) {
           ctx.error(`Failed to read text file ${path.toString()}`);
           ctx.error(err);
@@ -301,7 +301,7 @@ export function ReadTextFile(
  * Returns the absolute normalized path, with symbolic links
  * resolved.
  *
- * https://deno.land/api@v1.40.3?unstable=true&s=Deno.realPathSync
+ * https://deno.land/api@v1.40.3?unstable=true&s=Deno.realPath
  * @returns The absolute normalized path, with symbolic links resolved.
  */
 export function RealPath(
@@ -309,9 +309,9 @@ export function RealPath(
 ): Expression {
   return (
     <impure
-      fun={(ctx: Context) => {
+      fun={ async (ctx: Context) => {
         try {
-          return Deno.realPathSync(path);
+          return await Deno.realPath(path);
         } catch (err) {
           ctx.error(`Failed to get real path for ${path.toString()}`);
           ctx.error(err);
@@ -325,7 +325,7 @@ export function RealPath(
 /**
  * Removes the named file or directory.
  *
- * See https://deno.land/api@v1.40.3?unstable=true&s=Deno.removeSync
+ * See https://deno.land/api@v1.40.3?unstable=true&s=Deno.remove
  * @returns The empty string.
  */
 export function Remove(
@@ -333,9 +333,9 @@ export function Remove(
 ): Expression {
   return (
     <impure
-      fun={(ctx: Context) => {
+      fun={ async (ctx: Context) => {
         try {
-          Deno.removeSync(path, options);
+          await Deno.remove(path, options);
         } catch (err) {
           ctx.error(`Failed to remove ${path.toString()}`);
           if (options) {
@@ -356,7 +356,7 @@ export function Remove(
  * it. OS-specific restrictions may apply when `oldpath` and `newpath` are in
  * different directories.
  *
- * See https://deno.land/api@v1.40.3?unstable=true&s=Deno.renameSync
+ * See https://deno.land/api@v1.40.3?unstable=true&s=Deno.rename
  * @returns The empty string.
  */
 export function Rename(
@@ -364,9 +364,9 @@ export function Rename(
 ): Expression {
   return (
     <impure
-      fun={(ctx: Context) => {
+      fun={ async (ctx: Context) => {
         try {
-          Deno.renameSync(oldpath, newpath);
+          await Deno.rename(oldpath, newpath);
         } catch (err) {
           ctx.error(
             `Failed to rename (move) ${styleFile(oldpath.toString())} to ${
@@ -385,7 +385,7 @@ export function Rename(
 /**
  * Creates `newpath` as a symbolic link to `oldpath`.
  *
- * See https://deno.land/api@v1.40.3?unstable=true&s=Deno.symlinkSync
+ * See https://deno.land/api@v1.40.3?unstable=true&s=Deno.symlink
  * @returns The empty string.
  */
 export function Symlink(
@@ -397,9 +397,9 @@ export function Symlink(
 ): Expression {
   return (
     <impure
-      fun={(ctx: Context) => {
+      fun={ async (ctx: Context) => {
         try {
-          Deno.symlinkSync(oldpath, newpath, options);
+          await Deno.symlink(oldpath, newpath, options);
         } catch (err) {
           ctx.error(
             `Failed to create ${
@@ -422,7 +422,7 @@ export function Symlink(
  * Truncates (or extends) the specified file, to reach the specified `len`.
  * If `len` is not specified then the entire file contents are truncated.
  *
- * See https://deno.land/api@v1.40.3?unstable=true&s=Deno.truncateSync
+ * See https://deno.land/api@v1.40.3?unstable=true&s=Deno.truncate
  * @returns The empty string.
  */
 export function Truncate(
@@ -430,9 +430,9 @@ export function Truncate(
 ): Expression {
   return (
     <impure
-      fun={(ctx: Context) => {
+      fun={ async (ctx: Context) => {
         try {
-          Deno.truncateSync(path, len);
+          await Deno.truncate(path, len);
         } catch (err) {
           ctx.error(
             `Failed to truncate ${path} to length ${
@@ -453,7 +453,7 @@ export function Truncate(
  * system object referenced by `path`. Given times are either in seconds
  * (UNIX epoch time) or as `Date` objects.
  *
- * See https://deno.land/api@v1.40.3?unstable=true&s=Deno.utimeSync
+ * See https://deno.land/api@v1.40.3?unstable=true&s=Deno.utime
  * @returns The empty string.
  */
 export function Utime(
@@ -465,9 +465,9 @@ export function Utime(
 ): Expression {
   return (
     <impure
-      fun={(ctx: Context) => {
+      fun={ async (ctx: Context) => {
         try {
-          Deno.utimeSync(path, atime, mtime);
+          await Deno.utime(path, atime, mtime);
         } catch (err) {
           ctx.error(
             `Failed to change access tme and modification time of ${path.toString()} to ${atime} and ${mtime} respectively.`,
@@ -485,7 +485,7 @@ export function Utime(
  * Write the expanded child to the given `path`, by default creating a new file
  * if needed, else overwriting.
  *
- * See https://deno.land/api@v1.40.3?unstable=true&s=Deno.writeTextFileSync
+ * See https://deno.land/api@v1.40.3?unstable=true&s=Deno.writeTextFile
  * @returns The expanded child.
  */
 export function WriteTextFile(
@@ -499,7 +499,7 @@ export function WriteTextFile(
     <map
       fun={(evaled: string, ctx: Context) => {
         try {
-          Deno.writeTextFileSync(path, evaled, options);
+          await Deno.writeTextFile(path, evaled, options);
           return evaled;
         } catch (err) {
           ctx.error(`Failed to write file ${path.toString()}`);
@@ -519,7 +519,7 @@ export function WriteTextFile(
 /**
  * Copies a file or directory. The directory can have contents. Like `cp -r`.
  *
- * See https://deno.land/std@0.63.0/fs/mod.ts?s=copySync
+ * See https://deno.land/std@0.63.0/fs/mod.ts?s=copy
  * @returns The empty string.
  */
 export function Copy(
@@ -531,9 +531,9 @@ export function Copy(
 ): Expression {
   return (
     <impure
-      fun={(ctx: Context) => {
+      fun={ async (ctx: Context) => {
         try {
-          copySync(src, dest, options);
+          copy(src, dest, options);
         } catch (err) {
           ctx.error(
             `Failed to copy ${styleFile(src.toString())} to ${
@@ -557,7 +557,7 @@ export function Copy(
  * directory is not empty. If the directory does not exist, it is created. The
  * directory itself is not deleted.
  *
- * See https://deno.land/std@0.63.0/fs/mod.ts?s=emptyDirSync
+ * See https://deno.land/std@0.63.0/fs/mod.ts?s=emptyDir
  * @returns The empty string.
  */
 export function EmptyDir(
@@ -567,9 +567,9 @@ export function EmptyDir(
 ): Expression {
   return (
     <impure
-      fun={(ctx: Context) => {
+      fun={ async (ctx: Context) => {
         try {
-          emptyDirSync(dir);
+          emptyDir(dir);
         } catch (err) {
           ctx.error(
             `Failed to ensure an empty directory at ${styleFile(dir)}`,
@@ -587,7 +587,7 @@ export function EmptyDir(
  * Ensures that the directory exists. If the directory structure does not
  * exist, it is created. Like `mkdir -p`.
  *
- * See https://deno.land/std@0.63.0/fs/mod.ts?s=ensureDirSync
+ * See https://deno.land/std@0.63.0/fs/mod.ts?s=ensureDir
  * @returns The empty string.
  */
 export function EnsureDir(
@@ -597,9 +597,9 @@ export function EnsureDir(
 ): Expression {
   return (
     <impure
-      fun={(ctx: Context) => {
+      fun={ async (ctx: Context) => {
         try {
-          ensureDirSync(path);
+          ensureDir(path);
         } catch (err) {
           ctx.error(
             `Failed to ensure that a directory exists at ${styleFile(path)}`,
@@ -618,7 +618,7 @@ export function EnsureDir(
  * in directories that do not exist, these directories are created. If the file
  * already exists, it is NOT MODIFIED.
  *
- * See https://deno.land/std@0.63.0/fs/mod.ts?s=ensureFileSync
+ * See https://deno.land/std@0.63.0/fs/mod.ts?s=ensureFile
  * @returns The empty string.
  */
 export function EnsureFile(
@@ -628,9 +628,9 @@ export function EnsureFile(
 ): Expression {
   return (
     <impure
-      fun={(ctx: Context) => {
+      fun={ async (ctx: Context) => {
         try {
-          ensureFileSync(path);
+          ensureFile(path);
         } catch (err) {
           ctx.error(
             `Failed to ensure that a file exists at ${styleFile(path)}`,
@@ -648,7 +648,7 @@ export function EnsureFile(
  * Ensures that the hard link exists. If the directory structure does not
  * exist, it is created.
  *
- * See https://deno.land/std@0.63.0/fs/mod.ts?s=ensureLinkSync
+ * See https://deno.land/std@0.63.0/fs/mod.ts?s=ensureLink
  * @returns The empty string.
  */
 export function EnsureLink(
@@ -659,9 +659,9 @@ export function EnsureLink(
 ): Expression {
   return (
     <impure
-      fun={(ctx: Context) => {
+      fun={ async (ctx: Context) => {
         try {
-          ensureLinkSync(src, dest);
+          ensureLink(src, dest);
         } catch (err) {
           ctx.error(
             `Failed to ensure that a link exists at ${styleFile(dest)} to ${
@@ -681,7 +681,7 @@ export function EnsureLink(
  * Ensures that the symlink exists. If the directory structure does not
  * exist, it is created.
  *
- * See https://deno.land/std@0.63.0/fs/mod.ts?s=ensureSymlinkSync
+ * See https://deno.land/std@0.63.0/fs/mod.ts?s=ensureSymlink
  * @returns The empty string.
  */
 export function EnsureSymlink(
@@ -692,9 +692,9 @@ export function EnsureSymlink(
 ): Expression {
   return (
     <impure
-      fun={(ctx: Context) => {
+      fun={ async (ctx: Context) => {
         try {
-          ensureSymlinkSync(src, dest);
+          ensureSymlink(src, dest);
         } catch (err) {
           ctx.error(
             `Failed to ensure that a symlink exists at ${styleFile(dest)} to ${
@@ -722,9 +722,9 @@ export function EnsureNot(
 ): Expression {
   return (
     <impure
-      fun={(ctx: Context) => {
+      fun={ async (ctx: Context) => {
         try {
-          Deno.removeSync(path, { recursive: true });
+          await Deno.remove(path, { recursive: true });
         } catch (err) {
           if (err instanceof Deno.errors.NotFound) {
             return ""; // Yay, this is a success.
