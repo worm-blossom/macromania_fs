@@ -1,7 +1,8 @@
+import { createLogger } from "./deps.ts";
 import {
   Context,
-  CopyOptions,
   copy,
+  CopyOptions,
   emptyDir,
   ensureDir,
   ensureFile,
@@ -9,9 +10,13 @@ import {
   ensureSymlink,
   Expression,
   Expressions,
-  styleFile,
   expressions,
+  styleFile,
 } from "./deps.ts";
+
+const l = createLogger("FsLogger");
+const ConfigMacro = l.ConfigMacro;
+export { ConfigMacro as FsLogger };
 
 /**
  * Changes the permission of a specific file/directory of
@@ -39,12 +44,13 @@ export function Chmod(
         try {
           await await Deno.chmod(path, mode);
         } catch (err) {
-          ctx.error(
+          l.error(
+            ctx,
             `Failed to chmod file ${
               styleFile(path.toString())
             } to the permissions 0o${mode.toString(8)}F.`,
           );
-          ctx.error(err);
+          l.logGroup(ctx, () => l.error(ctx, err));
           ctx.halt();
         }
         return "";
@@ -68,16 +74,16 @@ export function Chown(
         try {
           await Deno.chown(path, uid ?? null, gid ?? null);
         } catch (err) {
-          ctx.error(
-            `Failed to chown file ${styleFile(path.toString())}`,
-          );
-          if (uid != undefined) {
-            ctx.error(`User id: ${uid}`);
-          }
-          if (gid != undefined) {
-            ctx.error(`Group id: ${gid}`);
-          }
-          ctx.error(err);
+          l.error(ctx, `Failed to chown file ${styleFile(path.toString())}`);
+          l.logGroup(ctx, () => {
+            if (uid != undefined) {
+              l.error(ctx, `User id: ${uid}`);
+            }
+            if (gid != undefined) {
+              l.error(ctx, `Group id: ${gid}`);
+            }
+            l.error(ctx, err);
+          });
           ctx.halt();
         }
         return "";
@@ -99,16 +105,17 @@ export function CopyFile(
 ): Expression {
   return (
     <impure
-      fun={ async (ctx: Context) => {
+      fun={async (ctx: Context) => {
         try {
           await Deno.copyFile(from, to);
         } catch (err) {
-          ctx.error(
+          l.error(
+            ctx,
             `Failed to copy file from ${styleFile(from.toString())} to ${
               styleFile(to.toString())
             }`,
           );
-          ctx.error(err);
+          l.logGroup(ctx, () => l.error(ctx, err));
           ctx.halt();
         }
         return "";
@@ -128,16 +135,17 @@ export function Link(
 ): Expression {
   return (
     <impure
-      fun={ async (ctx: Context) => {
+      fun={async (ctx: Context) => {
         try {
           await Deno.link(oldpath, newpath);
         } catch (err) {
-          ctx.error(
+          l.error(
+            ctx,
             `Failed to create ${
               styleFile(newpath.toString())
             } as a hardlink to ${styleFile(oldpath.toString())}`,
           );
-          ctx.error(err);
+          l.logGroup(ctx, () => l.error(ctx, err));
           ctx.halt();
         }
         return "";
@@ -163,15 +171,17 @@ export function MakeTempDir(
 ): Expression {
   return (
     <impure
-      fun={ async (ctx: Context) => {
+      fun={async (ctx: Context) => {
         try {
           return await Deno.makeTempDir(options);
         } catch (err) {
-          ctx.error(`Failed to create temporary directory.`);
-          if (options) {
-            ctx.error(`Options: ${JSON.stringify(options)}`);
-          }
-          ctx.error(err);
+          l.error(ctx, `Failed to create temporary directory.`);
+          l.logGroup(ctx, () => {
+            if (options) {
+              l.error(ctx, `Options: ${JSON.stringify(options)}`);
+            }
+            l.error(ctx, err);
+          });
           ctx.halt();
           return "";
         }
@@ -196,15 +206,17 @@ export function MakeTempFile(
 ): Expression {
   return (
     <impure
-      fun={ async (ctx: Context) => {
+      fun={async (ctx: Context) => {
         try {
           return await Deno.makeTempFile(options);
         } catch (err) {
-          ctx.error(`Failed to create temporary file.`);
-          if (options) {
-            ctx.error(`Options: ${JSON.stringify(options)}`);
-          }
-          ctx.error(err);
+          l.error(ctx, `Failed to create temporary file.`);
+          l.logGroup(ctx, () => {
+            if (options) {
+              l.error(ctx, `Options: ${JSON.stringify(options)}`);
+            }
+            l.error(ctx, err);
+          });
           return ctx.halt();
         }
       }}
@@ -223,15 +235,17 @@ export function Mkdir(
 ): Expression {
   return (
     <impure
-      fun={ async (ctx: Context) => {
+      fun={async (ctx: Context) => {
         try {
           await Deno.mkdir(path, options);
         } catch (err) {
-          ctx.error(`Failed to create directory ${path.toString()}`);
-          if (options) {
-            ctx.error(`Options: ${JSON.stringify(options)}`);
-          }
-          ctx.error(err);
+          l.error(ctx, `Failed to create directory ${path.toString()}`);
+          l.logGroup(ctx, () => {
+            if (options) {
+              l.error(ctx, `Options: ${JSON.stringify(options)}`);
+            }
+            l.error(ctx, err);
+          });
           ctx.halt();
         }
         return "";
@@ -251,12 +265,12 @@ export function ReadLink(
 ): Expression {
   return (
     <impure
-      fun={ async (ctx: Context) => {
+      fun={async (ctx: Context) => {
         try {
           return await Deno.readLink(path);
         } catch (err) {
-          ctx.error(`Failed to read link ${path.toString()}`);
-          ctx.error(err);
+          l.error(ctx, `Failed to read link ${path.toString()}`);
+          l.logGroup(ctx, () => l.error(ctx, err));
           return ctx.halt();
         }
       }}
@@ -276,12 +290,12 @@ export function ReadTextFile(
 ): Expression {
   return (
     <impure
-      fun={ async (ctx: Context) => {
+      fun={async (ctx: Context) => {
         try {
           return await Deno.readTextFile(path);
         } catch (err) {
-          ctx.error(`Failed to read text file ${path.toString()}`);
-          ctx.error(err);
+          l.error(ctx, `Failed to read text file ${path.toString()}`);
+          l.logGroup(ctx, () => l.error(ctx, err));
           return ctx.halt();
         }
       }}
@@ -301,12 +315,12 @@ export function RealPath(
 ): Expression {
   return (
     <impure
-      fun={ async (ctx: Context) => {
+      fun={async (ctx: Context) => {
         try {
           return await Deno.realPath(path);
         } catch (err) {
-          ctx.error(`Failed to get real path for ${path.toString()}`);
-          ctx.error(err);
+          l.error(ctx, `Failed to get real path for ${path.toString()}`);
+          l.logGroup(ctx, () => l.error(ctx, err));
           return ctx.halt();
         }
       }}
@@ -325,15 +339,17 @@ export function Remove(
 ): Expression {
   return (
     <impure
-      fun={ async (ctx: Context) => {
+      fun={async (ctx: Context) => {
         try {
           await Deno.remove(path, options);
         } catch (err) {
-          ctx.error(`Failed to remove ${path.toString()}`);
-          if (options) {
-            ctx.error(`Options: ${JSON.stringify(options)}`);
-          }
-          ctx.error(err);
+          l.error(ctx, `Failed to remove ${path.toString()}`);
+          l.logGroup(ctx, () => {
+            if (options) {
+              l.error(ctx, `Options: ${JSON.stringify(options)}`);
+            }
+            l.error(ctx, err);
+          });
           ctx.halt();
         }
         return "";
@@ -356,16 +372,17 @@ export function Rename(
 ): Expression {
   return (
     <impure
-      fun={ async (ctx: Context) => {
+      fun={async (ctx: Context) => {
         try {
           await Deno.rename(oldpath, newpath);
         } catch (err) {
-          ctx.error(
+          l.error(
+            ctx,
             `Failed to rename (move) ${styleFile(oldpath.toString())} to ${
               styleFile(newpath.toString())
             }`,
           );
-          ctx.error(err);
+          l.logGroup(ctx, () => l.error(ctx, err));
           ctx.halt();
         }
         return "";
@@ -389,19 +406,22 @@ export function Symlink(
 ): Expression {
   return (
     <impure
-      fun={ async (ctx: Context) => {
+      fun={async (ctx: Context) => {
         try {
           await Deno.symlink(oldpath, newpath, options);
         } catch (err) {
-          ctx.error(
+          l.error(
+            ctx,
             `Failed to create ${
               styleFile(newpath.toString())
             } as a symlinklink to ${styleFile(oldpath.toString())}`,
           );
-          if (options) {
-            ctx.error(`Options: ${JSON.stringify(options)}`);
-          }
-          ctx.error(err);
+          l.logGroup(ctx, () => {
+            if (options) {
+              l.error(ctx, `Options: ${JSON.stringify(options)}`);
+            }
+            l.error(ctx, err);
+          });
           ctx.halt();
         }
         return "";
@@ -422,16 +442,17 @@ export function Truncate(
 ): Expression {
   return (
     <impure
-      fun={ async (ctx: Context) => {
+      fun={async (ctx: Context) => {
         try {
           await Deno.truncate(path, len);
         } catch (err) {
-          ctx.error(
+          l.error(
+            ctx,
             `Failed to truncate ${path} to length ${
               len === undefined ? 0 : len
             }.`,
           );
-          ctx.error(err);
+          l.logGroup(ctx, () => l.error(ctx, err));
           ctx.halt();
         }
         return "";
@@ -457,14 +478,15 @@ export function Utime(
 ): Expression {
   return (
     <impure
-      fun={ async (ctx: Context) => {
+      fun={async (ctx: Context) => {
         try {
           await Deno.utime(path, atime, mtime);
         } catch (err) {
-          ctx.error(
-            `Failed to change access tme and modification time of ${path.toString()} to ${atime} and ${mtime} respectively.`,
+          l.error(
+            ctx,
+            `Failed to change access time and modification time of ${path.toString()} to ${atime} and ${mtime} respectively.`,
           );
-          ctx.error(err);
+          l.logGroup(ctx, () => l.error(ctx, err));
           ctx.halt();
         }
         return "";
@@ -489,16 +511,18 @@ export function WriteTextFile(
 ): Expression {
   return (
     <map
-      fun={(evaled: string, ctx: Context) => {
+      fun={async (evaled: string, ctx: Context) => {
         try {
           await Deno.writeTextFile(path, evaled, options);
           return evaled;
         } catch (err) {
-          ctx.error(`Failed to write file ${path.toString()}`);
-          if (options) {
-            ctx.error(`Options: ${JSON.stringify(options)}`);
-          }
-          ctx.error(err);
+          l.error(ctx, `Failed to write file ${path.toString()}`);
+          l.logGroup(ctx, () => {
+            if (options) {
+              l.error(ctx, `Options: ${JSON.stringify(options)}`);
+            }
+            l.error(ctx, err);
+          });
           return ctx.halt();
         }
       }}
@@ -523,19 +547,22 @@ export function Copy(
 ): Expression {
   return (
     <impure
-      fun={ async (ctx: Context) => {
+      fun={async (ctx: Context) => {
         try {
-          copy(src, dest, options);
+          await copy(src, dest, options);
         } catch (err) {
-          ctx.error(
+          l.error(
+            ctx,
             `Failed to copy ${styleFile(src.toString())} to ${
               styleFile(dest.toString())
             }`,
           );
-          if (options) {
-            ctx.error(`Options: ${JSON.stringify(options)}`);
-          }
-          ctx.error(err);
+          l.logGroup(ctx, () => {
+            if (options) {
+              l.error(ctx, `Options: ${JSON.stringify(options)}`);
+            }
+            l.error(ctx, err);
+          });
           ctx.halt();
         }
         return "";
@@ -559,14 +586,15 @@ export function EmptyDir(
 ): Expression {
   return (
     <impure
-      fun={ async (ctx: Context) => {
+      fun={async (ctx: Context) => {
         try {
-          emptyDir(dir);
+          await emptyDir(dir);
         } catch (err) {
-          ctx.error(
+          l.error(
+            ctx,
             `Failed to ensure an empty directory at ${styleFile(dir)}`,
           );
-          ctx.error(err);
+          l.logGroup(ctx, () => l.error(ctx, err));
           ctx.halt();
         }
         return "";
@@ -589,14 +617,15 @@ export function EnsureDir(
 ): Expression {
   return (
     <impure
-      fun={ async (ctx: Context) => {
+      fun={async (ctx: Context) => {
         try {
-          ensureDir(path);
+          await ensureDir(path);
         } catch (err) {
-          ctx.error(
+          l.error(
+            ctx,
             `Failed to ensure that a directory exists at ${styleFile(path)}`,
           );
-          ctx.error(err);
+          l.logGroup(ctx, () => l.error(ctx, err));
           ctx.halt();
         }
         return "";
@@ -620,14 +649,15 @@ export function EnsureFile(
 ): Expression {
   return (
     <impure
-      fun={ async (ctx: Context) => {
+      fun={async (ctx: Context) => {
         try {
-          ensureFile(path);
+          await ensureFile(path);
         } catch (err) {
-          ctx.error(
+          l.error(
+            ctx,
             `Failed to ensure that a file exists at ${styleFile(path)}`,
           );
-          ctx.error(err);
+          l.logGroup(ctx, () => l.error(ctx, err));
           ctx.halt();
         }
         return "";
@@ -651,16 +681,17 @@ export function EnsureLink(
 ): Expression {
   return (
     <impure
-      fun={ async (ctx: Context) => {
+      fun={async (ctx: Context) => {
         try {
-          ensureLink(src, dest);
+          await ensureLink(src, dest);
         } catch (err) {
-          ctx.error(
+          l.error(
+            ctx,
             `Failed to ensure that a link exists at ${styleFile(dest)} to ${
               styleFile(src)
             }`,
           );
-          ctx.error(err);
+          l.logGroup(ctx, () => l.error(ctx, err));
           ctx.halt();
         }
         return "";
@@ -684,16 +715,17 @@ export function EnsureSymlink(
 ): Expression {
   return (
     <impure
-      fun={ async (ctx: Context) => {
+      fun={async (ctx: Context) => {
         try {
-          ensureSymlink(src, dest);
+          await ensureSymlink(src, dest);
         } catch (err) {
-          ctx.error(
+          l.error(
+            ctx,
             `Failed to ensure that a symlink exists at ${styleFile(dest)} to ${
               styleFile(src)
             }`,
           );
-          ctx.error(err);
+          l.logGroup(ctx, () => l.error(ctx, err));
           ctx.halt();
         }
         return "";
@@ -714,19 +746,20 @@ export function EnsureNot(
 ): Expression {
   return (
     <impure
-      fun={ async (ctx: Context) => {
+      fun={async (ctx: Context) => {
         try {
           await Deno.remove(path, { recursive: true });
         } catch (err) {
           if (err instanceof Deno.errors.NotFound) {
             return ""; // Yay, this is a success.
           } else {
-            ctx.error(
+            l.error(
+              ctx,
               `Failed to ensure that there is no file (or directory) at ${
                 styleFile(path)
               }`,
             );
-            ctx.error(err);
+            l.logGroup(ctx, () => l.error(ctx, err));
             ctx.halt();
           }
         }
