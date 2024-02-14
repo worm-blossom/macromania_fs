@@ -1,4 +1,5 @@
 import {
+  Context,
   CopyOptions,
   copySync,
   emptyDirSync,
@@ -6,9 +7,11 @@ import {
   ensureFileSync,
   ensureLinkSync,
   ensureSymlinkSync,
-} from "https://deno.land/std@0.63.0/fs/mod.ts";
-
-import { Context, Expression, styleFile } from "../macromania/main.ts";
+  Expression,
+  Expressions,
+  styleFile,
+  expressions,
+} from "./deps.ts";
 
 export interface ChmodProps {
   /**
@@ -210,8 +213,7 @@ export function MakeTempFile(
             ctx.error(`Options: ${JSON.stringify(options)}`);
           }
           ctx.error(err);
-          ctx.halt();
-          return "";
+          return ctx.halt();
         }
       }}
     />
@@ -263,8 +265,7 @@ export function ReadLink(
         } catch (err) {
           ctx.error(`Failed to read link ${path.toString()}`);
           ctx.error(err);
-          ctx.halt();
-          return "";
+          return ctx.halt();
         }
       }}
     />
@@ -289,8 +290,7 @@ export function ReadTextFile(
         } catch (err) {
           ctx.error(`Failed to read text file ${path.toString()}`);
           ctx.error(err);
-          ctx.halt();
-          return "";
+          return ctx.halt();
         }
       }}
     />
@@ -315,8 +315,7 @@ export function RealPath(
         } catch (err) {
           ctx.error(`Failed to get real path for ${path.toString()}`);
           ctx.error(err);
-          ctx.halt();
-          return "";
+          return ctx.halt();
         }
       }}
     />
@@ -493,7 +492,7 @@ export function WriteTextFile(
   { path, options, children }: {
     path: string | URL;
     options?: Deno.WriteFileOptions;
-    children: Expression;
+    children?: Expressions;
   },
 ): Expression {
   return (
@@ -508,12 +507,11 @@ export function WriteTextFile(
             ctx.error(`Options: ${JSON.stringify(options)}`);
           }
           ctx.error(err);
-          ctx.halt();
+          return ctx.halt();
         }
-        return "";
       }}
     >
-      {children}
+      {expressions(children)}
     </map>
   );
 }
@@ -593,18 +591,18 @@ export function EmptyDir(
  * @returns The empty string.
  */
 export function EnsureDir(
-  { dir }: {
-    dir: string;
+  { path }: {
+    path: string;
   },
 ): Expression {
   return (
     <impure
       fun={(ctx: Context) => {
         try {
-          ensureDirSync(dir);
+          ensureDirSync(path);
         } catch (err) {
           ctx.error(
-            `Failed to ensure that a directory exists at ${styleFile(dir)}`,
+            `Failed to ensure that a directory exists at ${styleFile(path)}`,
           );
           ctx.error(err);
           ctx.halt();
@@ -624,18 +622,18 @@ export function EnsureDir(
  * @returns The empty string.
  */
 export function EnsureFile(
-  { filePath }: {
-    filePath: string;
+  { path }: {
+    path: string;
   },
 ): Expression {
   return (
     <impure
       fun={(ctx: Context) => {
         try {
-          ensureFileSync(filePath);
+          ensureFileSync(path);
         } catch (err) {
           ctx.error(
-            `Failed to ensure that a file exists at ${styleFile(filePath)}`,
+            `Failed to ensure that a file exists at ${styleFile(path)}`,
           );
           ctx.error(err);
           ctx.halt();
@@ -705,6 +703,40 @@ export function EnsureSymlink(
           );
           ctx.error(err);
           ctx.halt();
+        }
+        return "";
+      }}
+    />
+  );
+}
+
+/**
+ * Ensures that the file does not exist.
+ *
+ * @returns The empty string.
+ */
+export function EnsureNot(
+  { path }: {
+    path: string;
+  },
+): Expression {
+  return (
+    <impure
+      fun={(ctx: Context) => {
+        try {
+          Deno.removeSync(path, { recursive: true });
+        } catch (err) {
+          if (err instanceof Deno.errors.NotFound) {
+            return ""; // Yay, this is a success.
+          } else {
+            ctx.error(
+              `Failed to ensure that there is no file (or directory) at ${
+                styleFile(path)
+              }`,
+            );
+            ctx.error(err);
+            ctx.halt();
+          }
         }
         return "";
       }}
