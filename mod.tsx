@@ -8,9 +8,9 @@ import {
   styleFile,
 } from "./deps.ts";
 
-const l = createLogger("FsLogger");
+const l = createLogger("LoggerFs");
 const ConfigMacro = l.ConfigMacro;
-export { ConfigMacro as FsLogger };
+export { ConfigMacro as LoggerFs };
 
 /**
  * Changes the permission of a specific file/directory of
