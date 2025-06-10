@@ -1,11 +1,15 @@
 import {
-  Mode,
+  type Mode,
   Path,
-  Pathish,
-  SimpleFilesystem,
-  SimpleFilesystemExt,
+  type Pathish,
+  type SimpleFilesystem,
+  type SimpleFilesystemExt,
 } from "@aljoscha-meyer/simple-fs-abstraction";
-import { type Children, Context, Expression } from "@wormblossom/macromania";
+import {
+  type Children,
+  Context,
+  type Expression,
+} from "@wormblossom/macromania";
 
 export type FsConfig = {
   fs?: null | (SimpleFilesystem & SimpleFilesystemExt);
@@ -261,6 +265,17 @@ export function Dir(
   );
 }
 
+const [FileNameStateScope, getCurrentFilename, _] = Context.createScopedState<
+  null | string
+>(() => null);
+
+/**
+ * While evaluating the children of a [`File`] macro, this returns the `name` prop of that macro. Otherwise, returns `null`.
+ */
+export function currentFile(ctx: Context): string | null {
+  return getCurrentFilename(ctx);
+}
+
 export function File(
   { children, name, mode, forwardContent }: {
     children?: Children;
@@ -281,7 +296,7 @@ export function File(
               return forwardContent ? evaled : "";
             }}
           >
-            {children}
+            <FileNameStateScope>{children}</FileNameStateScope>
           </map>
         );
       }}
