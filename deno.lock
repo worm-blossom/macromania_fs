@@ -1,12 +1,21 @@
 {
   "version": "5",
   "specifiers": {
+    "jsr:@macromania/macromania@*": "0.1.1",
     "jsr:@std/assert@0.221": "0.221.0",
     "jsr:@std/fmt@0.221": "0.221.0",
     "jsr:@std/fmt@^1.0.8": "1.0.8",
-    "jsr:@std/path@^1.1.0": "1.1.0"
+    "jsr:@std/internal@^1.0.10": "1.0.12",
+    "jsr:@std/path@^1.1.0": "1.1.2",
+    "jsr:@wormblossom/simple-fs-abstraction@0.1": "0.1.0"
   },
   "jsr": {
+    "@macromania/macromania@0.1.1": {
+      "integrity": "d70631164dfbe497f72813c3357d3638c288823373bdf016de2c4932457aaa6a",
+      "dependencies": [
+        "jsr:@std/fmt@^1.0.8"
+      ]
+    },
     "@std/assert@0.221.0": {
       "integrity": "a5f1aa6e7909dbea271754fd4ab3f4e687aeff4873b4cef9a320af813adb489a",
       "dependencies": [
@@ -19,14 +28,27 @@
     "@std/fmt@1.0.8": {
       "integrity": "71e1fc498787e4434d213647a6e43e794af4fd393ef8f52062246e06f7e372b7"
     },
-    "@std/path@1.1.0": {
-      "integrity": "ddc94f8e3c275627281cbc23341df6b8bcc874d70374f75fec2533521e3d6886"
+    "@std/internal@1.0.12": {
+      "integrity": "972a634fd5bc34b242024402972cd5143eac68d8dffaca5eaa4dba30ce17b027"
+    },
+    "@std/path@1.1.2": {
+      "integrity": "c0b13b97dfe06546d5e16bf3966b1cadf92e1cc83e56ba5476ad8b498d9e3038",
+      "dependencies": [
+        "jsr:@std/internal"
+      ]
+    },
+    "@wormblossom/simple-fs-abstraction@0.1.0": {
+      "integrity": "a7e99d1d1cbed0dcaba0a5e96d40941d0945fc846a035aa0bf44a7284ee74bab",
+      "dependencies": [
+        "jsr:@std/path"
+      ]
     }
   },
   "workspace": {
     "dependencies": [
+      "jsr:@macromania/macromania@*",
       "jsr:@std/assert@0.221",
-      "jsr:@wormblossom/macromania@*"
+      "jsr:@wormblossom/simple-fs-abstraction@0.1"
     ]
   }
 }

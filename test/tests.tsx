@@ -5,7 +5,7 @@ import {
 } from "@wormblossom/macromania";
 import { assert, assertEquals } from "@std/assert";
 import { ConfigFs, Dir, File } from "../mod.tsx";
-import { FilesystemExt, MemoryFs } from "@aljoscha-meyer/simple-fs-abstraction";
+import { FilesystemExt, MemoryFs } from "@wormblossom/simple-fs-abstraction";
 
 Deno.test("Halts when not configured", async () => {
   await (async () => {
