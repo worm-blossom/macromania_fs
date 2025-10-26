@@ -8,7 +8,7 @@
 
   "imports": {
     "@std/assert": "jsr:@std/assert@^0.221.0",
-    "@wormblossom/macromania": "jsr:@macromania/macromania",
+    "@wormblossom/macromania": "jsr:@macromania/macromania@^0.1.1",
     "@wormblossom/simple-fs-abstraction": "jsr:@wormblossom/simple-fs-abstraction@^0.1.0"
   },
 

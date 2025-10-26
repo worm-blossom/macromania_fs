@@ -30,9 +30,19 @@ export type FsConfig = {
   fs?: null | (SimpleFilesystem & SimpleFilesystemExt);
 };
 
-const [ConfigFs_, getConfig] = Context.createConfig<FsConfig>(() => ({
+// Do a dance to satisfy the jsr publishing slow-types check.
+const tmp: [
+  (
+    props: FsConfig | {
+      children?: Children;
+    },
+  ) => Expression,
+  (ctx: Context) => Required<FsConfig>,
+] = Context.createConfig<FsConfig>(() => ({
   fs: null,
 }));
+const ConfigFs_ = tmp[0];
+const getConfig = tmp[1];
 
 /**
  * The config macro for `macromania-fs`.
